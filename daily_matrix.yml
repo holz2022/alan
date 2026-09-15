@@ -1,0 +1,32 @@
+name: Daily Cal.com Matrix Promotion (100 Events)
+
+on:
+  # 定时触发：每天 UTC 02:00（即北京时间每天上午 10:00 自动运行）
+  schedule:
+    - cron: '0 2 * * *'
+
+  # 支持在 GitHub 网页上手动一键立即运行测试
+  workflow_dispatch:
+
+jobs:
+  publish-matrix:
+    runs-on: ubuntu-latest
+    env:
+      ACTIONS_RUNNER_FORCE_NODE_24: "true"
+
+    steps:
+      - name: 检出仓库代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python 环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 安装依赖
+        run: pip install requests
+
+      - name: 执行每日 100 条矩阵生成与发布
+        env:
+          CAL_API_KEY: ${{ secrets.CAL_API_KEY }}
+        run: python daily_matrix_events.py
