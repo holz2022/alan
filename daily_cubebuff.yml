@@ -1,0 +1,32 @@
+name: Daily CubeBuff Product Matrix (100 Events)
+
+on:
+  # 定时触发：每天 UTC 02:30 自动运行（北京时间 上午 10:30）
+  schedule:
+    - cron: '30 2 * * *'
+
+  # 支持在 GitHub 网页上手动一键立即运行测试
+  workflow_dispatch:
+
+jobs:
+  publish-cubebuff-matrix:
+    runs-on: ubuntu-latest
+    env:
+      ACTIONS_RUNNER_FORCE_NODE_24: "true"
+
+    steps:
+      - name: 检出仓库代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python 环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 安装依赖
+        run: pip install requests
+
+      - name: 执行每日 100 条 CubeBuff 产品矩阵发布
+        env:
+          CUBEBUFF_CAL_API_KEY: ${{ secrets.CUBEBUFF_CAL_API_KEY }}
+        run: python daily_cubebuff_events.py
