@@ -1,0 +1,35 @@
+name: Daily CubeBuff Blogger Backlink Posts (50 Posts)
+
+on:
+  # 定时执行：每天 UTC 03:30（即北京时间每天中午 11:30 自动运行）
+  schedule:
+    - cron: '30 3 * * *'
+
+  # 支持在 GitHub Actions 网页上一键手动立即运行测试
+  workflow_dispatch:
+
+jobs:
+  publish-cubebuff-blogger-posts:
+    runs-on: ubuntu-latest
+    env:
+      ACTIONS_RUNNER_FORCE_NODE_24: "true"
+
+    steps:
+      - name: 检出仓库代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python 运行环境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 安装运行依赖
+        run: pip install requests
+
+      - name: 自动发布 50 篇 CubeBuff 高质量零重复外链博文至 Blogger
+        env:
+          BLOGGER_CLIENT_ID: ${{ secrets.BLOGGER_CLIENT_ID }}
+          BLOGGER_CLIENT_SECRET: ${{ secrets.BLOGGER_CLIENT_SECRET }}
+          BLOGGER_REFRESH_TOKEN: ${{ secrets.BLOGGER_REFRESH_TOKEN }}
+          POST_COUNT: "50"
+        run: python daily_cubebuff_blogger.py
