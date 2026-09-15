@@ -5,12 +5,19 @@ import datetime
 import requests
 
 BLOG_ID = "8017524329887935778"
-CLIENT_ID = os.environ.get("BLOGGER_CLIENT_ID")
-CLIENT_SECRET = os.environ.get("BLOGGER_CLIENT_SECRET")
-REFRESH_TOKEN = os.environ.get("BLOGGER_REFRESH_TOKEN")
+
+# 自动清除首尾多余的空格与回车换行符
+CLIENT_ID = os.environ.get("BLOGGER_CLIENT_ID", "").strip()
+CLIENT_SECRET = os.environ.get("BLOGGER_CLIENT_SECRET", "").strip()
+REFRESH_TOKEN = os.environ.get("BLOGGER_REFRESH_TOKEN", "").strip()
+
+print("🔍 正在检查 GitHub Secrets 凭据配置状态...")
+print(f"   BLOGGER_CLIENT_ID 状态: {'已配置 (长度: ' + str(len(CLIENT_ID)) + ')' if CLIENT_ID else '❌ 未配置'}")
+print(f"   BLOGGER_CLIENT_SECRET 状态: {'已配置 (长度: ' + str(len(CLIENT_SECRET)) + ')' if CLIENT_SECRET else '❌ 未配置'}")
+print(f"   BLOGGER_REFRESH_TOKEN 状态: {'已配置 (长度: ' + str(len(REFRESH_TOKEN)) + ')' if REFRESH_TOKEN else '❌ 未配置'}")
 
 if not (CLIENT_ID and CLIENT_SECRET and REFRESH_TOKEN):
-    raise ValueError("Missing Blogger OAuth credentials in GitHub Secrets!")
+    raise ValueError("❌ 缺少必要的 Secrets，请检查 GitHub Settings -> Secrets -> Actions 中是否完整配置了 3 个密钥！")
 
 FACILITIES = [
     {"name": "Luxury Hotel & Banquet Kitchens", "scale": "high-capacity banquet operations"},
@@ -73,8 +80,18 @@ def get_access_token():
         "grant_type": "refresh_token"
     }
     res = requests.post(token_url, data=payload)
-    res.raise_for_status()
-    return res.json()["access_token"]
+    if res.status_code != 200:
+        print(f"\n❌ Google OAuth Token 获取失败！状态码: {res.status_code}")
+        print(f"   返回详情: {res.text}")
+        if "invalid_client" in res.text:
+            print("   👉 原因提示: Client ID 或 Client Secret 错误，请检查是否填错。")
+        elif "invalid_grant" in res.text:
+            print("   👉 原因提示: Refresh Token 无效或已失效，请重新在 OAuth Playground 生成。")
+        res.raise_for_status()
+    
+    token = res.json().get("access_token")
+    print("🔑 Google OAuth 认证成功，已顺利获取临时 Access Token！")
+    return token
 
 def build_article():
     fac = random.choice(FACILITIES)
