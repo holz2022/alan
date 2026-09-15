@@ -1,11 +1,11 @@
-name: Daily Blogger Backlink Posts (30 Posts)
+name: Daily HSYL Blogger Backlink Posts (50 Posts)
 
 on:
   # 定时执行：每天 UTC 03:00（即北京时间每天上午 11:00 自动运行）
   schedule:
     - cron: '0 3 * * *'
 
-  # 支持在 GitHub 网页上手动一键立即运行测试
+  # 支持在 GitHub Actions 网页上一键手动立即运行测试
   workflow_dispatch:
 
 jobs:
@@ -26,9 +26,10 @@ jobs:
       - name: 安装依赖
         run: pip install requests
 
-      - name: 自动发布 30 篇外链博文至 Blogger
+      - name: 自动发布 50 篇 HSYL 商厨外链博文至 Blogger (全子链接+实物配图)
         env:
           BLOGGER_CLIENT_ID: ${{ secrets.BLOGGER_CLIENT_ID }}
           BLOGGER_CLIENT_SECRET: ${{ secrets.BLOGGER_CLIENT_SECRET }}
           BLOGGER_REFRESH_TOKEN: ${{ secrets.BLOGGER_REFRESH_TOKEN }}
+          POST_COUNT: "50"
         run: python daily_blogger_posts.py
